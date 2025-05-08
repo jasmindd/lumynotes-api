@@ -12,3 +12,12 @@ router.post('/', async(req, res) => {
         res.status(500).json({ error: err.message });
     }
 });
+// Obtener notas de un usuario
+router.get('/', async(req, res) => {
+    try {
+        const notes = await Note.find({ userId: req.query.userId });
+        res.json(notes);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
