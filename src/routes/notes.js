@@ -39,3 +39,17 @@ router.delete('/:id', async(req, res) => {
         res.status(500).json({ error: err.message });
     }
 });
+// Compartir nota
+router.post('/share', async(req, res) => {
+    const { noteId, sharedUserId } = req.body;
+    try {
+        const note = await Note.findById(noteId);
+        note.sharedWith.push(sharedUserId);
+        await note.save();
+        res.json(note);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+module.exports = router;
