@@ -1,18 +1,24 @@
-const parser = require("body-parser");
 const express = require('express');
-const app = express();
-const port = 3000;
-const mongoose = require("mongoose");
-require('dotenv').config();
-app.use(parser.urlencoded({ extended: false })); //permite leer los datos que vienen en la petición
-app.use(parser.json()); // transforma los datos a formato JSON
+const mongoose = require('mongoose');
+const dotenv = require('dotenv');
 
-//Conexión a la base de datos
-mongoose
-    .connect(process.env.MONGODB_URI)
-    .then(() => console.log("Conexión exitosa"))
-    .catch((error) => console.log(error));
-//Conexión al puerto
-app.listen(port, () => {
-    console.log(`Example app listening on port ${port}`)
+dotenv.config();
+
+const app = express();
+app.use(express.json());
+
+// Conexión a MongoDB
+mongoose.connect(process.env.MONGO_URI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true
+}).then(() => {
+    console.log('✅ Conectado a MongoDB');
+}).catch((err) => {
+    console.error('❌ Error al conectar con MongoDB:', err.message);
+});
+
+// Servidor
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+    console.log(`🚀 Servidor corriendo en el puerto ${PORT}`);
 });
