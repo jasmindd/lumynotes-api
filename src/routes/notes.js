@@ -30,3 +30,12 @@ router.put('/:id', async(req, res) => {
         res.status(500).json({ error: err.message });
     }
 });
+// Eliminar nota
+router.delete('/:id', async(req, res) => {
+    try {
+        await Note.findByIdAndDelete(req.params.id);
+        res.json({ message: 'Nota eliminada' });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
