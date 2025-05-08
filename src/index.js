@@ -1,6 +1,7 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const dotenv = require('dotenv');
+const noteRoutes = require('./routes/notes');
 
 dotenv.config();
 
@@ -16,6 +17,10 @@ mongoose.connect(process.env.MONGO_URI, {
 }).catch((err) => {
     console.error('❌ Error al conectar con MongoDB:', err.message);
 });
+
+// Rutas
+app.use('/api/notes', noteRoutes);
+
 
 // Servidor
 const PORT = process.env.PORT || 3000;
