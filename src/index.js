@@ -3,11 +3,18 @@ const mongoose = require('mongoose');
 const dotenv = require('dotenv');
 const noteRoutes = require('./routes/notes');
 const taskRoutes = require('../routes/taskRoutes');
+const userRoutes = require('../routes/userRoutes');
+
 
 dotenv.config();
 
 const app = express();
 app.use(express.json());
+
+// Middleware
+app.use(cors());
+app.use(express.json());
+
 
 // Conexión a MongoDB
 mongoose.connect(process.env.MONGO_URI, {
@@ -21,7 +28,8 @@ mongoose.connect(process.env.MONGO_URI, {
 
 // Rutas
 app.use('/api/notes', noteRoutes);
-app.use('/api/tasks', taskRoutes);
+app.use('/api/tasks', taskRoutes);  
+app.use('/api/users', userRoutes);
 
 
 // Servidor
