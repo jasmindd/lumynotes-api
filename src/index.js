@@ -2,6 +2,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const dotenv = require('dotenv');
 const noteRoutes = require('./routes/notes');
+const taskRoutes = require('../routes/taskRoutes');
 
 dotenv.config();
 
@@ -20,6 +21,7 @@ mongoose.connect(process.env.MONGO_URI, {
 
 // Rutas
 app.use('/api/notes', noteRoutes);
+app.use('/api/tasks', taskRoutes);
 
 
 // Servidor
