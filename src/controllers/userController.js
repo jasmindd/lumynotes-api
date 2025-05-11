@@ -31,4 +31,14 @@ exports.login = async (req, res) => {
       res.status(500).json({ message: 'Error al iniciar sesión.', error });
     }
   };
-  
+
+  exports.updateProfile = async (req, res) => {
+    const { id } = req.params;
+    const { name, profilePic } = req.body;
+    try {
+      const user = await User.findByIdAndUpdate(id, { name, profilePic }, { new: true });
+      res.json(user);
+    } catch (error) {
+      res.status(500).json({ message: 'Error al actualizar perfil.', error });
+    }
+  };
