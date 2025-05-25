@@ -7,5 +7,7 @@ router.get('/', notesController.getNotes);
 router.put('/:id', notesController.updateNote);
 router.delete('/:id', notesController.deleteNote);
 router.post('/share', notesController.shareNote);
+router.get('/stats', notesController.getNoteStats);
+
 
 module.exports = router;

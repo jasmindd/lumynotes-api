@@ -53,3 +53,20 @@ exports.shareNote = async(req, res) => {
         res.status(500).json({ error: err.message });
     }
 };
+// Estadísticas de notas por usuario
+exports.getNoteStats = async(req, res) => {
+    try {
+        const userId = req.query.userId;
+        const totalNotes = await Note.countDocuments({ userId });
+
+        const sharedNotes = await Note.countDocuments({ userId, sharedWith: { $exists: true, $not: { $size: 0 } } });
+
+        res.json({
+            totalNotes,
+            sharedNotes,
+            personalNotes: totalNotes - sharedNotes
+        });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+};
