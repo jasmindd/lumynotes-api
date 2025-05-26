@@ -1,14 +1,3 @@
-const mongoose = require('mongoose');
-
-const userSchema = new mongoose.Schema({
-  name: { type: String, required: true },
-  email: { type: String, required: true, unique: true },
-  password: { type: String, required: true },
-  profilePic: { type: String, default: '' }
-});
-
-module.exports = mongoose.model('User', userSchema);
-
 
 const User = require('../models/User');
 const bcrypt = require('bcryptjs');
@@ -20,7 +9,7 @@ exports.register = async (req, res) => {
     const existingUser = await User.findOne({ email });
     if (existingUser) return res.status(400).json({ message: 'El usuario ya existe.' });
 
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const hashedPassword = await bcrypt.hash(password, 10); // ¡No olvides encriptar!
     const user = new User({ name, email, password: hashedPassword });
     await user.save();
 
@@ -39,11 +28,10 @@ exports.login = async (req, res) => {
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) return res.status(401).json({ message: 'Contraseña incorrecta.' });
 
-    // Generar token con id del usuario y expiración
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
 
-    res.status(200).json({ 
-      message: 'Inicio de sesión exitoso', 
+    res.status(200).json({
+      message: 'Inicio de sesión exitoso',
       token,
       user: {
         id: user._id,
@@ -61,7 +49,6 @@ exports.updateProfile = async (req, res) => {
   const { id } = req.params;
   const { name, profilePic } = req.body;
 
-  // Validar que el usuario que hace la petición sea el mismo que se quiere actualizar
   if (req.userId !== id) {
     return res.status(403).json({ message: 'No autorizado para actualizar este perfil' });
   }

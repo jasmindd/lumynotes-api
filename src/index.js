@@ -6,24 +6,20 @@ const noteRoutes = require('./routes/notes');
 const taskRoutes = require('./routes/taskRoutes');
 const userRoutes = require('./routes/userRoutes');
 
-
 dotenv.config();
 
 const app = express();
-app.use(express.json());
 
 // Middleware
 app.use(cors());
-app.use(express.json());
+app.use(express.json());  // Solo una vez basta
 
-
-// Conexión a MongoDB
-mongoose.connect(process.env.MONGO_URI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true
-}).then(() => {
+// Conexión a MongoDB sin opciones deprecated
+mongoose.connect(process.env.MONGO_URI)
+.then(() => {
     console.log('✅ Conectado a MongoDB');
-}).catch((err) => {
+})
+.catch((err) => {
     console.error('❌ Error al conectar con MongoDB:', err.message);
 });
 
@@ -31,7 +27,6 @@ mongoose.connect(process.env.MONGO_URI, {
 app.use('/api/notes', noteRoutes);
 app.use('/api/tasks', taskRoutes);  
 app.use('/api/users', userRoutes);
-
 
 // Servidor
 const PORT = process.env.PORT || 3000;
