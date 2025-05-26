@@ -1,5 +1,18 @@
+const mongoose = require('mongoose');
+
+const userSchema = new mongoose.Schema({
+  name: { type: String, required: true },
+  email: { type: String, required: true, unique: true },
+  password: { type: String, required: true },
+  profilePic: { type: String, default: '' }
+});
+
+module.exports = mongoose.model('User', userSchema);
+
+
 const User = require('../models/User');
 const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 
 exports.register = async (req, res) => {
   const { name, email, password } = req.body;
@@ -18,27 +31,45 @@ exports.register = async (req, res) => {
 };
 
 exports.login = async (req, res) => {
-    const { email, password } = req.body;
-    try {
-      const user = await User.findOne({ email });
-      if (!user) return res.status(404).json({ message: 'Usuario no encontrado.' });
-  
-      const isMatch = await bcrypt.compare(password, user.password);
-      if (!isMatch) return res.status(401).json({ message: 'Contraseña incorrecta.' });
-  
-      res.status(200).json({ message: 'Inicio de sesión exitoso', user });
-    } catch (error) {
-      res.status(500).json({ message: 'Error al iniciar sesión.', error });
-    }
-  };
+  const { email, password } = req.body;
+  try {
+    const user = await User.findOne({ email });
+    if (!user) return res.status(404).json({ message: 'Usuario no encontrado.' });
 
-  exports.updateProfile = async (req, res) => {
-    const { id } = req.params;
-    const { name, profilePic } = req.body;
-    try {
-      const user = await User.findByIdAndUpdate(id, { name, profilePic }, { new: true });
-      res.json(user);
-    } catch (error) {
-      res.status(500).json({ message: 'Error al actualizar perfil.', error });
-    }
-  };
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) return res.status(401).json({ message: 'Contraseña incorrecta.' });
+
+    // Generar token con id del usuario y expiración
+    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
+
+    res.status(200).json({ 
+      message: 'Inicio de sesión exitoso', 
+      token,
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        profilePic: user.profilePic
+      }
+    });
+  } catch (error) {
+    res.status(500).json({ message: 'Error al iniciar sesión.', error });
+  }
+};
+
+exports.updateProfile = async (req, res) => {
+  const { id } = req.params;
+  const { name, profilePic } = req.body;
+
+  // Validar que el usuario que hace la petición sea el mismo que se quiere actualizar
+  if (req.userId !== id) {
+    return res.status(403).json({ message: 'No autorizado para actualizar este perfil' });
+  }
+
+  try {
+    const user = await User.findByIdAndUpdate(id, { name, profilePic }, { new: true });
+    res.json(user);
+  } catch (error) {
+    res.status(500).json({ message: 'Error al actualizar perfil.', error });
+  }
+};
