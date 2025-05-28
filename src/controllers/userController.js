@@ -60,3 +60,13 @@ exports.updateProfile = async (req, res) => {
     res.status(500).json({ message: 'Error al actualizar perfil.', error });
   }
 };
+exports.getProfile = async (req, res) => {
+  try {
+    // El middleware auth debería poner el id en req.userId, o similar
+    const user = await User.findById(req.userId).select('-password');
+    if (!user) return res.status(404).json({ message: 'Usuario no encontrado' });
+    res.json(user);
+  } catch (err) {
+    res.status(500).json({ message: 'Error al obtener perfil' });
+  }
+};

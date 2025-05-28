@@ -1,24 +1,43 @@
 const Task = require('../models/Task');
 
 exports.createTask = async (req, res) => {
+  const { title, description, dueDate, completed } = req.body;
+
+  if (!title || !req.userId) {
+    return res.status(400).json({ message: 'Faltan datos obligatorios: title o userId' });
+  }
+
   try {
-    const { title, description, dueDate, userId } = req.body;
-    const task = new Task({ title, description, dueDate, userId });
-    await task.save();
-    res.status(201).json(task);
+    const newTask = new Task({
+      title,
+      description,
+      dueDate,
+      completed: completed || false,
+      userId: req.userId, // 👈 se extrae del token
+    });
+
+    const savedTask = await newTask.save();
+    res.status(201).json(savedTask);
   } catch (error) {
-    res.status(500).json({ message: 'Error al crear la tarea.', error });
+    console.error('Error al crear tarea:', error);
+    res.status(500).json({ message: 'Error al crear la tarea', error });
+  }
+  console.log('✅ Usuario autenticado:', req.userId);
+};
+
+
+
+// Controller de tareas
+exports.getTasks = async (req, res) => {
+  try {
+    const userId = req.userId; // <- esto lo pone el middleware
+    const tasks = await Task.find({ userId });
+    res.json(tasks);
+  } catch (error) {
+    res.status(500).json({ message: 'Error al obtener tareas.', error });
   }
 };
 
-exports.getTasks = async (req, res) => {
-  try {
-    const tasks = await Task.find({ userId: req.query.userId });
-    res.json(tasks);
-  } catch (error) {
-    res.status(500).json({ message: 'Error al obtener las tareas.', error });
-  }
-};
 
 exports.completeTask = async (req, res) => {
   try {
